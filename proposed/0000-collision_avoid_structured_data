@@ -1,0 +1,50 @@
+- Feature Name: Collision avoindance for structured data updates
+- Type enhancement
+- Related components routing, safe_client, safe_vault 
+- Start Date: 04-10-2015
+- RFC PR: (leave this empty)
+- Issue number: (leave this empty)
+
+# Summary
+
+To propose a mechamism for ordered updates to any structured data item from valid messages arriving
+that update the saem version number. 
+
+# Motivation
+
+There is an arguably unlikely event where a single owner (for simplicity) will update some data
+from more than one device near simultaneously. This would cause a data item to be potentially lost
+as a quorum agreement on it may not finalise with some nodes seeing different data for each
+version. This is a very simple, but effective approach to such issues.
+
+# Detailed design
+
+An update to a Structured Data element requires the version number increments. If more than one 
+update happens then the group consensus can hold differing updates. Only one of these updates is 
+acceptable and we must have a mechnism to decide on how to return an error plus the original data
+(a Put error). 
+
+This will be calculated by:
+
+1. Check version numbers are equal.
+
+2. Confirm owners have not changed (as this would open up "double spend" type errors etc.)
+
+3. Hash both serialised SD's
+
+4. Select lowest value hash and store as the real version.
+
+5. Return the higher hash value as an error to all owners. 
+
+
+# Drawbacks
+
+Why should we *not* do this?
+
+# Alternatives
+
+What other designs have been considered? What is the impact of not doing this?
+
+# Unresolved questions
+
+What parts of the design are still to be done?
