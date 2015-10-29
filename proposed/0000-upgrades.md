@@ -31,7 +31,7 @@ of state to new code must not lose any data.
 4. It is not possible to remote login and manually upgrade, all upgrades will be automatic. 
 
 5. Upgrade urgency, as only two versions will operate at one time there must be a mechanism where 
-nodes with older than current + 1 version can "recover" their status as nodes by upgrading to 
+nodes with older than current - 1 version can "recover" their status as nodes by upgrading to 
 `current`
 
 # Motivation
