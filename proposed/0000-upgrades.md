@@ -34,6 +34,22 @@ of state to new code must not lose any data.
 nodes with older than current - 1 version can "recover" their status as nodes by upgrading to 
 `current`
 
+##Further considerations
+
+As an autonomous network that contains volotile network state (i.e. state vanishes with power) there is a need for extra care in ensuring network stability and size. A vast reduction in size would mean greater potential for data (state) loss. 
+
+Wire protocol or message versioning would appear to be of very little use in the overall network as it does not answer the deeper questions of internal node objects, such as `state` containers, consensus algorithms etc. All of these add significant complexity if a simple approach is taken in upgrade versioning. Thinking deeper almost every code decision and object would require a seperate if statement or similar to decide which code branch to take. 
+
+In routing for instance where there is the notion of group based consensus that relies on address proximity and also signing keys the impact of a change in encryption algorithm would be catastrophic. Also the consensus would be particulalry complex where not only a quorum would be difficult to code, but would contain messages of different types (currunt andf currnt -1 versions) whcih when serialised will not be equal, from a security standpoint as a current - 1 node is this version 2 data or in fact an attack? 
+
+The next consideration is the inability to republish data at the moment as the network would depend on a client signature (and payment) for a Put or indeed a network group that can Put with the correct consensus. 
+
+##Initial thoughts/brainstorming ideas
+
+1.  Ensure nodes can restart as the same address by allowing them to keep a safecoin or similar signed structured data element. Such an element could be checked easily for correctness and if it contained a public key then the node can use it's stored private key to regain it's position in the network. If all nodes in a group did this the data would be republished `in place`
+2.  Run two nodes in parallel, where one is `current` and one is `current -1` while there are any `current - 1` nodes in the groups. These nodes woudl share the private key via secured IPC and both read and write messages in their native format silently dropping those it did not understand.
+3.  ......
+
 # Motivation
 
 Decentralised or autonomous networks cannot stop, restart or otherwise be controlled as a single 
