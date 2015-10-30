@@ -47,8 +47,9 @@ The next consideration is the inability to republish data at the moment as the n
 ##Initial thoughts/brainstorming ideas
 
 1.  Ensure nodes can restart as the same address by allowing them to keep a safecoin or similar signed structured data element. Such an element could be checked easily for correctness and if it contained a public key then the node can use it's stored private key to regain it's position in the network. If all nodes in a group did this the data would be republished `in place`
-2.  Run two nodes in parallel, where one is `current` and one is `current -1` while there are any `current - 1` nodes in the groups. These nodes woudl share the private key via secured IPC and both read and write messages in their native format silently dropping those it did not understand.
-3.  ......
+2.  Perhaps a temporary maintaining of a Structured Data element can be used to allow a single use public address for a node. This could be used to restart as the same node once. This could also allow for republish of all data, given som other considerations, such as previous distance from all of the data. In this case a node could join a group using a structured Data element, but the price of accpting this node is each node in the group deletes this data element.
+3.  Run two nodes in parallel, where one is `current` and one is `current -1` while there are any `current - 1` nodes in the groups. These nodes woudl share the private key via secured IPC and both read and write messages in their native format silently dropping those it did not understand.
+4.  ......
 
 # Motivation
 
