@@ -106,7 +106,7 @@ include the hash of the StructuredData element.
 
 Each node id added to the routing table should be "remembered" by all nodes that see this node. These
 remembered NodeId's will allow nodes to tie up refresh message node Id's with those found in the
-`DataBlock`
+`DataBlock` These "previously seen" nodes should be written to the nodes cache file for later proof.
 
 
 ###Network "difficulty"
