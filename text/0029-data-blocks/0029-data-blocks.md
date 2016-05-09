@@ -9,7 +9,7 @@
 # Summary
 
 Data blocks are a container that allows large blocks of data to be maintained. These blocks can be
-validated by any node on a network to contain valid data that was very likely (if not almost
+validated by a node on a network, close to the data name, to contain valid data that was very likely (if not almost
 guaranteed).to have been correctly stored onto the network.
 
 # Motivation
@@ -21,7 +21,7 @@ as:
 
 2. How to allow data to be republished in a secure manner.
 
-Point two actually encompasses two large issues in itself. The ability to start a node and make it's data
+Point 2 actually encompasses two large issues in itself. The ability to start a node and make it's data
 available is obviously required where we have large amounts of data to maintain. Another large advantage
 is the ability for such a network to recover from a full system outage (full network collapse, worldwide
 power outage etc.).
@@ -31,27 +31,103 @@ nodes have the ability to accept and store such data then even incompatible upgr
 was not previously possible. This component requires some further research, but would appear to offer a
 significant advantage.
 
-
 # Detailed design
-
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the network to understand, and for somebody familiar with the code practices to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
 
 A data block can be defined as:
 
-A list of data type names that the node had stored over at least one session. The name of such a container
+A list of data type names that the node had stored over at least one session XXXXXXXXXXXXXX. The name of such a container
 is derived as `sha512(all names) xor NodeName`. Proof that this node was responsible for these chunks
 involves several checks.
 
 1. The claiming node must sign the list with the private key of the `data block`.
 2. The `DataBlock.key()` must provide the public key of the claiming node.
-3.
+3. The claiming nodes ID must be in the close_group of the data_block.
+4. The list of data types must contain data types greater than the number currently held by the group
+ ( This means each data type ID or SD must outnumber the size currently held by the group)
+    -If list of data held is less than provided then these DataBlocks must accumulate as per normal quorum rules
+    XXXXXXXXXX Ths is no use as gamers can create off line attacks here XXXXXXXXXXXXXXXX
 
+On node start it will pick up this list after bootstrapping on the network and send it to the group
+closest to the previous name of the vault (this is written to the previous data store)
+
+##When the network is growing
+
+The data_block entries must be within the current close group of the claimant node
+
+##When the network has shrunk
+
+The data_block entries are allowed to be outwith the current close_group.
+
+##Struct definition
+
+```rust
+
+struct DataBlock {
+    name : XorName,
+    list : vec<(DataIdentifier, [8usize; RefreshMsg]>, // current close group refresh mesagges
+    claiment_sig_key: crypto::sign::PublicKey,
+    claiment_enc_key: crypto::_box::PublicKey,
+}
+
+impl DataBlock {
+    fn claiment_name()->XorName {
+          XorName(self.claiment_sig_key + self.claiment_enc_key)
+    }
+
+    fn name() -> XorName {
+        sha512(list) xor claiment_name
+    }
+
+    fn list() -> &[] {
+        list
+    }
+
+
+}
+
+```
+
+On receipt of a Refresh message that contains a DataBlock, the receiving node will confirm each item the list of data names and types (DataIdentifier) are in it's close_group.
+
+##Prevention of injection attacks
+
+To prevent such data being simply created in an off-line attack. To prevent this, the node must have
+existed in the network and be able to prove this. This does not completely prevent off-line attacks, but
+certainly makes them significantly more difficult and increasingly so as the network grows.
+
+Each Refresh message received from a node is signed by that node to the claimant node. These refresh
+messages
+
+In network restarts there exists a window of opportunity for an injection attack. This is a case where
+invalid SD in particular could be injected. To prevent this the StructuredData refresh message must
+include the hash of the StructuredData element.
+
+####Node memory
+
+Each node id added to the routing table should be "remembered" by all nodes that see this node. These
+remembered NodeId's will allow nodes to tie up refresh message node Id's with those found in the
+`DataBlock`
+
+
+###Network "difficulty"
+
+The distance of the furthest group member to a nodes own ID is regarded as network difficulty. In small
+networks this will wildly fluctuate. This value must be written to the nodes configuration file, in case of SAFE this is the vault configuration file.
+
+###If list of existing data is zero
+
+This is a network restart, therefore we accept these messages as is and confirm there are at least
+GROUP_SIZE nodes signed such messages. The difficult measurement must match (or be less than) that of the  current receiving node in the previous network,
+
+###If network difficulty is reduced significantly (less than half previous)
+
+Confirm at least one node in current group exits in the array in the list of that data element.
 
 # Drawbacks
 
-Why should we *not* do this?
+In very small networks (less than approx 3000) network difficulty is a fluctuating number, this can probably not be prevented, but may
+allow unwanted data or in fact prevent valid data from being refreshed.
+
 
 # Alternatives
 
