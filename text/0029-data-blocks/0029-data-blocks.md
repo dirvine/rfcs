@@ -62,66 +62,10 @@ The data_block entries are allowed to be outwith the current close_group.
 
 ```rust
 
-struct DataBlock {
-    name : XorName,
-    list : vec<(DataIdentifier, [8usize; RefreshMsg]>, // current close group refresh mesagges
-    claiment_sig_key: crypto::sign::PublicKey,
-    claiment_enc_key: crypto::_box::PublicKey,
-}
-
-impl DataBlock {
-    fn claiment_name()->XorName {
-          XorName(self.claiment_sig_key + self.claiment_enc_key)
-    }
-
-    fn name() -> XorName {
-        sha512(list) xor claiment_name
-    }
-
-    fn list() -> &[] {
-        list
-    }
-
-
-}
-
 ```
 
 On receipt of a Refresh message that contains a DataBlock, the receiving node will confirm each item the list of data names and types (DataIdentifier) are in it's close_group.
 
-##Prevention of injection attacks
-
-To prevent such data being simply created in an off-line attack. To prevent this, the node must have
-existed in the network and be able to prove this. This does not completely prevent off-line attacks, but
-certainly makes them significantly more difficult and increasingly so as the network grows.
-
-Each Refresh message received from a node is signed by that node to the claimant node. These refresh
-messages
-
-In network restarts there exists a window of opportunity for an injection attack. This is a case where
-invalid SD in particular could be injected. To prevent this the StructuredData refresh message must
-include the hash of the StructuredData element.
-
-####Node memory
-
-Each node id added to the routing table should be "remembered" by all nodes that see this node. These
-remembered NodeId's will allow nodes to tie up refresh message node Id's with those found in the
-`DataBlock` These "previously seen" nodes should be written to the nodes cache file for later proof.
-
-
-###Network "difficulty"
-
-The distance of the furthest group member to a nodes own ID is regarded as network difficulty. In small
-networks this will wildly fluctuate. This value must be written to the nodes configuration file, in case of SAFE this is the vault configuration file.
-
-###If list of existing data is zero
-
-This is a network restart, therefore we accept these messages as is and confirm there are at least
-GROUP_SIZE nodes signed such messages. The difficult measurement must match (or be less than) that of the  current receiving node in the previous network,
-
-###If network difficulty is reduced significantly (less than half previous)
-
-Confirm at least one node in current group exits in the array in the list of that data element.
 
 # Drawbacks
 
