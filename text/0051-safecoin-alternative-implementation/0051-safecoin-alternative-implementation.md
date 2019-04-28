@@ -1,4 +1,4 @@
-# Safecoin Alternative Implementation
+[[#]] Safecoin Alternative Implementation
 
 - Status: postponed
 - Type: new feature
